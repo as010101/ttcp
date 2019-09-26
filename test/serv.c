@@ -12,11 +12,11 @@ int main()
     // socket
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0);
     if(serv_sock == -1){
-        printf("socket create fail!\n");
+        printf("server socket create fail!\n");
         exit(0);
     }
     else{
-        printf("socket create success!\n");
+        printf("server socket create success!\n");
     }
     
     // addr init
@@ -28,23 +28,47 @@ int main()
 
     // bind
     if(bind(serv_sock, (struct sockaddr_in*)&serv_addr, sizeof(serv_addr)) != 0){
-        printf("sock bind fail!\n");
+        printf("server sock bind fail!\n");
         exit(0);
     }
     else{
-        printf("sock bind success!\n");
+        printf("server sock bind success!\n");
     }
 
     // listen
     if(listen(serv_sock, 5) != 0){
-        printf("listen fail!\n");
+        printf("server listen fail!\n");
         exit(0);
     }
     else{
-        printf("listening!\n");
+        printf("server listening!\n");
     }
 
     // accept
+    struct sockaddr_in clnt_addr;
+    int len = sizeof(clnt_addr);
+    int sockin = accept(serv_sock, (struct sockaddr*)&clnt_addr, &len);
+    if(sockin < 0){
+        printf("server accept fail!\n");
+        exit(0);
+    }
+    else{
+        printf("server accept success!\n");
+    }
 
-    
+    // read
+    char buff[128] = {0};
+    read(sockin, buff, sizeof(buff));
+    printf("read from client: %s\n", buff);
+
+    // write
+    char buff2[256] = {0};
+    sprintf(buff2, "reply from server: %s\n", buff);
+    write(sockin, buff2, sizeof(buff2));
+
+    // close
+    printf("server exit!\n");
+    close(serv_sock);
+
+    return 0;
 }
