@@ -4,12 +4,12 @@
 #include <stdlib.h> 
 #include <string.h> 
 #include <sys/socket.h> 
-#define MAX 80 
-#define PORT 8080 
-#define SA struct sockaddr 
 
+void handlemsg(int sockfd);
 int main() 
 {
+	const static int PORT = 65321;
+
 	// socket
 	int clnt_sock = socket(AF_INET, SOCK_STREAM, 0);
 	if(clnt_sock == -1){
@@ -29,25 +29,40 @@ int main()
 	serv_addr.sin_port = htons(PORT);
 
 	// connect
-	if(connect(clnt_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr) != 0)){
-		printf("clnt connect fail!\n");
+	int rt = connect(clnt_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+	
+	if(rt != 0)
+	{
+		printf("code: %d, clnt connect fail!\n", rt);
 		exit(0);
 	}
 	else
-		printf("clnt connected!\n");
+		printf("code: %d, clnt connected!\n", rt);
 	
-	// reply server
-	char buff[64] = {0};
-	write(clnt_sock, buff, sizeof(buff));
+	handlemsg(clnt_sock);
 
-	// receive from server
-	bzero(buff, sizeof(buff));
-	read(clnt_sock, buff, sizeof(buff));
-
-	// close
-	printf("client exit!\n");
 	close(clnt_sock);
 
 	return 0;
 } 
 
+void handlemsg(int sockfd)
+{
+	const static int BUFF_MAX = 256;
+	char buff[BUFF_MAX];
+	for(;;){
+		bzero(buff, sizeof(buff));
+		printf("Say hello to server: ");
+		for(int i=0; i<BUFF_MAX && (buff[i] = getchar()) != '\n'; i++);
+		write(sockfd, buff, sizeof(buff));
+
+		bzero(buff, sizeof(buff));
+		read(sockfd, buff, sizeof(buff));
+		printf("From Server: %s", buff);
+
+		if(strncmp(buff, "exit", 4) == 0){
+			printf("Client exit... \n");
+			break;
+		}		
+	}
+}

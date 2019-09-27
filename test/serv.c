@@ -5,9 +5,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+void handlemsg(int sockfd);
 int main()
 {
-    const int PORT = 1024;
+    const static int PORT = 65321;
 
     // socket
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -55,20 +56,30 @@ int main()
     else{
         printf("server accept success!\n");
     }
-
-    // read
-    char buff[128] = {0};
-    read(sockin, buff, sizeof(buff));
-    printf("read from client: %s\n", buff);
-
-    // write
-    char buff2[256] = {0};
-    sprintf(buff2, "reply from server: %s\n", buff);
-    write(sockin, buff2, sizeof(buff2));
+    
+    handlemsg(sockin);
 
     // close
     printf("server exit!\n");
     close(serv_sock);
 
     return 0;
+}
+
+void handlemsg(int sockfd)
+{
+    const static int BUFF_MAX = 256;
+	char buff[BUFF_MAX];
+	for(;;){
+		bzero(buff, sizeof(buff));
+		read(sockfd, buff, sizeof(buff));
+		//printf("From Server: %s", buff);
+
+        write(sockfd, buff, sizeof(buff));
+
+		if(strncmp(buff, "exit", 4) == 0){
+			printf("server exit... \n");
+			break;
+		}        
+	}
 }
