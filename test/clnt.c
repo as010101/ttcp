@@ -53,7 +53,8 @@ void handlemsg(int sockfd)
 	for(;;){
 		bzero(buff, sizeof(buff));
 		printf("Say hello to server: ");
-		for(int i=0; i<BUFF_MAX && (buff[i] = getchar()) != '\n'; i++);
+		int i;
+		for(i=0; i<BUFF_MAX && (buff[i] = getchar()) != '\n'; i++);
 		write(sockfd, buff, sizeof(buff));
 
 		bzero(buff, sizeof(buff));
