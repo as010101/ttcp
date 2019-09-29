@@ -8,7 +8,7 @@
 void handlemsg(int sockfd);
 int main() 
 {
-	const static int PORT = 65321;
+	const static int PORT = 63321;
 
 	// socket
 	int clnt_sock = socket(AF_INET, SOCK_STREAM, 0);
