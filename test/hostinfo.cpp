@@ -21,7 +21,6 @@ int main(int argc, char** argv)
     cout<<"hostname:    "<<hostname<<endl;
     cout<<"h_name:  "<<hp->h_name<<endl;
     
-    // cout<<"h_alias_0: "<<hp->h_aliases[0]<<endl;
     for(char** aap = hp->h_aliases; *aap!=nullptr; aap++)
     {
         cout<<"hp->haliases:    "<<*aap<<endl;
@@ -34,7 +33,8 @@ int main(int argc, char** argv)
     char buff[32] = {0};
     for(char** aap = hp->h_addr_list; *aap!=nullptr; aap++)
     {
-        cout<< inet_ntop(hp->h_addrtype, *aap, buff, sizeof(buff))<<endl;
+        cout<< "net types of data: " << *aap << endl;
+        cout<< "converted: " << inet_ntop(hp->h_addrtype, *aap, buff, sizeof(buff))<<endl;
     }
     return 0;
 }
