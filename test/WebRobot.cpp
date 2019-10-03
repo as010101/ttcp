@@ -4,6 +4,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <fstream>
+#include <algorithm>
 
 //using namespace std;
 
@@ -92,32 +94,31 @@ std::string GetPageContent(const std::string& url, int port)
     struct timeval timeout = {1, 0};
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
-    char c;
-    bool flag = true;
-    while(recv(sockfd, &c, 1, 0))
-    {
-        if (c == '\r')
-        {
-            continue;
-        }
-        else if(c == '\n')
-        {
-            if (flag == false)
-                break;
-            flag = false;
-        }
-        else
-        {
-            flag = true;
-        }
-    }
+    // char c;
+    // bool flag = true;
+    // while(recv(sockfd, &c, 1, 0))
+    // {
+    //     if (c == '\r')
+    //     {
+    //         continue;
+    //     }
+    //     else if(c == '\n')
+    //     {
+    //         if (flag == false)
+    //             break;
+    //         flag = false;
+    //     }
+    //     else
+    //     {
+    //         flag = true;
+    //     }
+    // }
 
     const int BUFFSIZE = 512;
     int len;
     char buff[BUFFSIZE] = {0};
     while((len = recv(sockfd, buff, BUFFSIZE - 1, 0)) > 0)
     {
-        buff[len] = '\n';
         content += buff;
     }
     return content;
@@ -125,5 +126,22 @@ std::string GetPageContent(const std::string& url, int port)
 
 int main()
 {
-    std::cout << GetPageContent("www.baidu.com", 80) << std::endl;
+    const char* url = "https://tuchong.com/body/nikon-d850/";
+    std::string hostname, path, savefile;
+    ParseUrl(url, hostname, path);
+    savefile = hostname + path;
+    std::replace(savefile.begin(), savefile.end(), '/', '.');
+    std::ofstream of;
+    of.open(savefile, std::ios::out);
+    if(of)
+    {
+        of << GetPageContent(url, 80);
+        of.close();
+    }
+    else
+    {
+        std::cout<<"fail to create file: "<< savefile << std::endl;
+    }
+    
+    return 0;
 }
