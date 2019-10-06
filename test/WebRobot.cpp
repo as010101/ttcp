@@ -94,26 +94,6 @@ std::string GetPageContent(const std::string& url, int port)
     struct timeval timeout = {1, 0};
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
-    // char c;
-    // bool flag = true;
-    // while(recv(sockfd, &c, 1, 0))
-    // {
-    //     if (c == '\r')
-    //     {
-    //         continue;
-    //     }
-    //     else if(c == '\n')
-    //     {
-    //         if (flag == false)
-    //             break;
-    //         flag = false;
-    //     }
-    //     else
-    //     {
-    //         flag = true;
-    //     }
-    // }
-
     const int BUFFSIZE = 512;
     int len;
     char buff[BUFFSIZE] = {0};
@@ -124,18 +104,34 @@ std::string GetPageContent(const std::string& url, int port)
     return content;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    const char* url = "https://tuchong.com/body/nikon-d850/";
+    std::string urlstr;
+    if(argc<2)
+    {
+        std::cout<< "input url for parsing: ";
+        std::getline(std::cin, urlstr);
+    }
+    else
+    {
+        urlstr = argv[1];
+    }
+
+    // parse url
     std::string hostname, path, savefile;
-    ParseUrl(url, hostname, path);
+    ParseUrl(urlstr, hostname, path);
+
+    // save filename
     savefile = hostname + path;
     std::replace(savefile.begin(), savefile.end(), '/', '.');
+
+    // file open
     std::ofstream of;
     of.open(savefile, std::ios::out);
     if(of)
     {
-        of << GetPageContent(url, 80);
+        // fetch url content
+        of << GetPageContent(urlstr, 80);
         of.close();
     }
     else
@@ -143,5 +139,6 @@ int main()
         std::cout<<"fail to create file: "<< savefile << std::endl;
     }
     
+    std::cout<< "finished parsing url: " << urlstr << std::endl;
     return 0;
 }
