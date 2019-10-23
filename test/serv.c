@@ -6,10 +6,18 @@
 #include <sys/types.h>
 
 void handlemsg(int sockfd);
-int main()
+int main(int argc, char** argv)
 {
-    const static int PORT = 63321;
-
+    // const static int PORT = 63321;
+    int port = 63321;
+    if(argc<2)
+    {
+        char buff[32];
+        printf("please input port to bind: ");
+        scanf("%s", buff);
+        port = atoi(buff);
+    }
+    
     // socket
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0);
     if(serv_sock == -1){
@@ -25,7 +33,7 @@ int main()
     bzero(&serv_addr, sizeof(bzero));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = htons(port);
 
     // bind
     if(bind(serv_sock, (struct sockaddr_in*)&serv_addr, sizeof(serv_addr)) != 0){
