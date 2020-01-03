@@ -5,7 +5,7 @@
 #include <string.h> 
 #include <sys/socket.h> 
 #define MAX 80 
-#define PORT 8080 
+#define PORT 65321 
 #define SA struct sockaddr 
 void func(int sockfd) 
 { 
@@ -15,8 +15,7 @@ void func(int sockfd)
 		bzero(buff, sizeof(buff)); 
 		printf("Enter the string : "); 
 		n = 0; 
-		while ((buff[n++] = getchar()) != '\n') 
-			; 
+		while ((buff[n++] = getchar()) != '\n');
 		write(sockfd, buff, sizeof(buff)); 
 		bzero(buff, sizeof(buff)); 
 		read(sockfd, buff, sizeof(buff)); 
@@ -27,6 +26,56 @@ void func(int sockfd)
 		} 
 	} 
 } 
+
+
+static int read_n(int sockfd, void* buf, int length)
+{
+  int nread = 0;
+  while (nread < length)
+  {
+    ssize_t nr = ::read(sockfd, static_cast<char*>(buf) + nread, length - nread);
+    if (nr > 0)
+    {
+      nread += static_cast<int>(nr);
+    }
+    else if (nr == 0)
+    {
+      break;  // EOF
+    }
+    else if (errno != EINTR)
+    {
+      perror("read");
+      break;
+    }
+  }
+  return nread;
+}
+
+
+
+static int write_n(int sockfd, const void* buf, int length)
+{
+  int written = 0;
+  while (written < length)
+  {
+    ssize_t nw = ::write(sockfd, static_cast<const char*>(buf) + written, length - written);
+    if (nw > 0)
+    {
+      written += static_cast<int>(nw);
+    }
+    else if (nw == 0)
+    {
+      break;  // EOF
+    }
+    else if (errno != EINTR)
+    {
+      perror("write");
+      break;
+    }
+  }
+  return written;
+}
+
 
 int main() 
 { 
